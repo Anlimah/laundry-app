@@ -1,0 +1,13 @@
+{
+    "require": {
+        "vlucas/phpdotenv": "^2.4",
+        "altorouter/altorouter": "1.1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Auth\\": "Auth/",
+            "Controller\\": "Controller/",
+            "Core\\": "Core/"
+        } 
+    }
+}
