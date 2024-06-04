@@ -3,27 +3,36 @@
 namespace Controller;
 
 use Core\Database;
+use Core\Request;
 
-class Customer extends Database
+class Manager
 {
-    public function getAll()
+    private $db;
+
+    public function __construct($username, $password)
     {
-        return $this->run("SELECT * FROM `managers`")->fetchAll();
+        $this->db = new Database($username, $password);
     }
 
-    public function getById($id)
+    public function getAll($params = null)
     {
-        return $this->run("SELECT * FROM `managers` WHERE `id` = ?", [$id])->fetchOne();
+        return $this->db->run("SELECT * FROM `managers`")->fetchAll();
     }
 
-    public function getByBranchId($id)
+    public function getById($params = null)
     {
-        return $this->run("SELECT * FROM `managers` WHERE `branch_id` = ?", [$id])->fetchOne();
+        return $this->db->run("SELECT * FROM `managers` WHERE `id` = ?", [$params["id"]])->fetchOne();
     }
 
-    public function createAccount($data)
+    public function getByBranchId($params = null)
     {
-        return $this->run(
+        return $this->db->run("SELECT * FROM `managers` WHERE `branch_id` = ?", [$params["id"]])->fetchOne();
+    }
+
+    public function createAccount($params = null)
+    {
+        $data = Request::getBody();
+        return $this->db->run(
             "INSERT INTO `managers` 
             (`branch_id`, `first_name`, `last_name`, `phone_number`, `address`, `email_address`, `password`) 
             VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -39,9 +48,10 @@ class Customer extends Database
         )->insert();
     }
 
-    public function updateAccount($id, $data)
+    public function updateAccount($params = null)
     {
-        return $this->run(
+        $data = Request::getBody();
+        return $this->db->run(
             "UPDATE `managers` SET 
             `first_name` = ?, `last_name` = ?, `phone_number` = ?, `address` = ?, `email_address` = ?
             WHERE id = ?",
@@ -51,35 +61,37 @@ class Customer extends Database
                 $data["phone_number"],
                 $data["address"],
                 $data["email_address"],
-                $id
+                $params["id"]
             ]
         )->update();
     }
 
-    public function updatePassword($id, $data)
+    public function updatePassword($params = null)
     {
-        return $this->run(
+        $data = Request::getBody();
+        return $this->db->run(
             "UPDATE `managers` SET `password` = ? WHERE id = ?",
             [
                 password_hash($data["password"], PASSWORD_BCRYPT),
-                $id
+                $params["id"]
             ]
         )->update();
     }
 
-    public function deleteAccount($id)
+    public function deleteAccount($params = null)
     {
-        return $this->run("DELETE FROM `managers` WHERE id = ?", [$id])->delete();
+        return $this->db->run("DELETE FROM `managers` WHERE id = ?", [$params["id"]])->delete();
     }
 
-    public function createNotification($id, $data)
+    public function createNotification($params = null)
     {
+        $data = Request::getBody();
         $added = 0;
         foreach ($data as $notification) {
-            $added += $this->run(
+            $added += $this->db->run(
                 "INSERT INTO `managers_notification_settings` (`manager_id`, `type`, `enabled`) VALUES (?, ?, ?)",
                 [
-                    $id,
+                    $params["id"],
                     $notification["type"],
                     $notification["enabled"]
                 ]
@@ -88,16 +100,17 @@ class Customer extends Database
         return $added;
     }
 
-    public function updateNotification($id, $data)
+    public function updateNotification($params = null)
     {
+        $data = Request::getBody();
         $added = 0;
         foreach ($data as $notification) {
-            $added += $this->run(
+            $added += $this->db->run(
                 "UPDATE `managers_notification_settings` SET `type` = ?, `enabled` = ? WHERE `manager_id` = ?",
                 [
                     $notification["type"],
                     $notification["enabled"],
-                    $id
+                    $params["id"]
                 ]
             )->insert();
         }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Src\Controller;
+namespace Controller;
 
 use Core\Database;
 

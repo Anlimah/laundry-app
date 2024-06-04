@@ -3,27 +3,36 @@
 namespace Controller;
 
 use Core\Database;
+use Core\Request;
 
-class Driver extends Database
+class Driver
 {
-    public function getAll()
+    private $db;
+
+    public function __construct($username, $password)
     {
-        return $this->run("SELECT * FROM `drivers`")->fetchAll();
+        $this->db = new Database($username, $password);
     }
 
-    public function getById($id)
+    public function getAll($params = null)
     {
-        return $this->run("SELECT * FROM `drivers` WHERE `id` = ?", [$id])->fetchOne();
+        return $this->db->run("SELECT * FROM `drivers`")->fetchAll();
     }
 
-    public function getByBranchId($id)
+    public function getById($params = null)
     {
-        return $this->run("SELECT * FROM `drivers` WHERE `branch_id` = ?", [$id])->fetchOne();
+        return $this->db->run("SELECT * FROM `drivers` WHERE `id` = ?", [$params["id"]])->fetchOne();
     }
 
-    public function createAccount($data)
+    public function getByBranchId($params = null)
     {
-        return $this->run(
+        return $this->db->run("SELECT * FROM `drivers` WHERE `branch_id` = ?", [$params["id"]])->fetchOne();
+    }
+
+    public function createAccount($params = null)
+    {
+        $data = Request::getBody();
+        return $this->db->run(
             "INSERT INTO `drivers` 
             (`branch_id`, `first_name`, `last_name`, `phone_number`, `address`, `email_address`, `password`) 
             VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -39,9 +48,10 @@ class Driver extends Database
         )->insert();
     }
 
-    public function updateAccount($id, $data)
+    public function updateAccount($params = null)
     {
-        return $this->run(
+        $data = Request::getBody();
+        return $this->db->run(
             "UPDATE `drivers` SET 
             `first_name` = ?, `last_name` = ?, `phone_number` = ?, `address` = ?, `email_address` = ?
             WHERE id = ?",
@@ -51,35 +61,37 @@ class Driver extends Database
                 $data["phone_number"],
                 $data["address"],
                 $data["email_address"],
-                $id
+                $params["id"]
             ]
         )->update();
     }
 
-    public function updatePassword($id, $data)
+    public function updatePassword($params = null)
     {
-        return $this->run(
+        $data = Request::getBody();
+        return $this->db->run(
             "UPDATE `drivers` SET `password` = ? WHERE id = ?",
             [
                 password_hash($data["password"], PASSWORD_BCRYPT),
-                $id
+                $params["id"]
             ]
         )->update();
     }
 
-    public function deleteAccount($id)
+    public function deleteAccount($params = null)
     {
-        return $this->run("DELETE FROM `drivers` WHERE id = ?", [$id])->delete();
+        return $this->db->run("DELETE FROM `drivers` WHERE id = ?", [$params["id"]])->delete();
     }
 
-    public function createNotification($id, $data)
+    public function createNotification($params = null)
     {
+        $data = Request::getBody();
         $added = 0;
         foreach ($data as $notification) {
-            $added += $this->run(
+            $added += $this->db->run(
                 "INSERT INTO `drivers_notification_settings` (`driver_id`, `type`, `enabled`) VALUES (?, ?, ?)",
                 [
-                    $id,
+                    $params["id"],
                     $notification["type"],
                     $notification["enabled"]
                 ]
@@ -88,48 +100,51 @@ class Driver extends Database
         return $added;
     }
 
-    public function updateNotification($id, $data)
+    public function updateNotification($params = null)
     {
+        $data = Request::getBody();
         $added = 0;
         foreach ($data as $notification) {
-            $added += $this->run(
+            $added += $this->db->run(
                 "UPDATE `drivers_notification_settings` SET `type` = ?, `enabled` = ? WHERE `driver_id` = ?",
                 [
                     $notification["type"],
                     $notification["enabled"],
-                    $id
+                    $params["id"]
                 ]
             )->insert();
         }
         return $added;
     }
 
-    public function addPreferences($id, $data)
+    public function addPreferences($params = null)
     {
+        $data = Request::getBody();
         $added = 0;
         foreach ($data as $preference) {
-            $added += $this->run(
+            $added += $this->db->run(
                 "UPDATE `drivers_preferences` SET `setting_name` = ?, `setting_value` = ? WHERE `driver_id` = ?",
                 [
                     $preference["name"],
                     $preference["value"],
-                    $id
+                    $params["id"]
                 ]
             )->insert();
         }
         return $added;
     }
 
-    public function updatePreferences($id, $data)
+    public function updatePreferences($params = null)
     {
+        $data = Request::getBody();
         $added = 0;
         foreach ($data as $preference) {
-            $added += $this->run(
+            $added += $this->db->run(
                 "UPDATE `drivers_preferences` SET `setting_value` = ? WHERE setting_name` = ? AND `driver_id` = ?",
                 [
                     $preference["value"],
                     $preference["name"],
-                    $id
+                    $params["id"]
                 ]
             )->insert();
         }

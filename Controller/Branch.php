@@ -2,13 +2,16 @@
 
 namespace Controller;
 
+use Core\Request;
+use Core\Database;
+
 class Branch
 {
     private $db;
 
-    public function __construct($db)
+    public function __construct($username, $password)
     {
-        $this->db = $db;
+        $this->db = new Database($username, $password);
     }
 
     public function getAll()
@@ -26,6 +29,7 @@ class Branch
 
     public function create($data)
     {
+        $data = Request::getBody();
         $query = "INSERT INTO `branches`
         (`name`, `address`, `latitude`, `longitude`, `phone_number`, `email_address`) 
         VALUES (:name, :address, :latitude, :longitude, :phone_number, :email_address)";
@@ -42,6 +46,7 @@ class Branch
 
     public function edit($id, $data)
     {
+        $data = Request::getBody();
         $query = "UPDATE `branches` SET 
         `name` = :name, `address` = :address, `latitude` = :latitude, `longitude` = :longitude, 
         `phone_number` = :phone_number, `email_address` = :email_address WHERE `id` = :id";

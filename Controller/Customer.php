@@ -3,77 +3,73 @@
 namespace Controller;
 
 use Core\Database;
+use Core\Request;
 
-class Customer extends Database
+class Customer
 {
-    public function getAll()
+    private $db;
+
+    public function __construct($username, $password)
     {
-        return $this->run("SELECT * FROM `customers`")->fetchAll();
+        $this->db = new Database($username, $password);
     }
 
-    public function getById($id)
+    public function getAll($params = null)
     {
-        return $this->run("SELECT * FROM `customers` WHERE `id` = ?", [$id])->fetchOne();
+        return $this->db->run("SELECT * FROM `customers`")->fetchAll();
     }
 
-    public function createAccount($data)
+    public function getById($params = null)
     {
-        return $this->run(
+        return $this->db->run("SELECT * FROM `customers` WHERE `id` = ?", [$params["id"]])->fetchOne();
+    }
+
+    public function createCustomer($data = [])
+    {
+        return $this->db->run(
             "INSERT INTO `customers` 
-            (`first_name`, `last_name`, `phone_number`, `address`, `email_address`, `password`) 
-            VALUES (?, ?, ?, ?, ?, ?)",
+            (`first_name`, `last_name`, `phone_number`, `address`) 
+            VALUES (?, ?, ?, ?)",
             [
                 $data["first_name"],
                 $data["last_name"],
                 $data["phone_number"],
-                $data["address"],
-                $data["email_address"],
-                password_hash($data["password"], PASSWORD_BCRYPT)
+                $data["address"]
             ]
         )->insert();
     }
 
-    public function updateAccount($id, $data)
+    public function updateCustomer($params = null)
     {
-        return $this->run(
+        $data = Request::getBody();
+        return $this->db->run(
             "UPDATE `customers` SET 
-            `first_name` = ?, `last_name` = ?, `phone_number` = ?, `address` = ?, `email_address` = ?
+            `first_name` = ?, `last_name` = ?, `phone_number` = ?, `address` = ?
             WHERE id = ?",
             [
                 $data["first_name"],
                 $data["last_name"],
                 $data["phone_number"],
                 $data["address"],
-                $data["email_address"],
-                $id
+                $params["id"]
             ]
         )->update();
     }
 
-    public function updatePassword($id, $data)
+    public function deleteCustomer($params = null)
     {
-        return $this->run(
-            "UPDATE `customers` SET `password` = ? WHERE id = ?",
-            [
-                password_hash($data["password"], PASSWORD_BCRYPT),
-                $id
-            ]
-        )->update();
+        return $this->db->run("DELETE FROM `customers` WHERE id = ?", [$params["id"]])->delete();
     }
 
-    public function deleteAccount($id)
+    public function createNotification($params = null)
     {
-        return $this->run("DELETE FROM `customers` WHERE id = ?", [$id])->delete();
-    }
-
-    public function createNotification($id, $data)
-    {
+        $data = Request::getBody();
         $added = 0;
         foreach ($data as $notification) {
-            $added += $this->run(
+            $added += $this->db->run(
                 "INSERT INTO `customers_notification_settings` (`customer_id`, `type`, `enabled`) VALUES (?, ?, ?)",
                 [
-                    $id,
+                    $params["id"],
                     $notification["type"],
                     $notification["enabled"]
                 ]
@@ -82,48 +78,51 @@ class Customer extends Database
         return $added;
     }
 
-    public function updateNotification($id, $data)
+    public function updateNotification($params = null)
     {
+        $data = Request::getBody();
         $added = 0;
         foreach ($data as $notification) {
-            $added += $this->run(
+            $added += $this->db->run(
                 "UPDATE `customers_notification_settings` SET `type` = ?, `enabled` = ? WHERE `customer_id` = ?",
                 [
                     $notification["type"],
                     $notification["enabled"],
-                    $id
+                    $params["id"]
                 ]
             )->insert();
         }
         return $added;
     }
 
-    public function addPreferences($id, $data)
+    public function addPreferences($params = null)
     {
+        $data = Request::getBody();
         $added = 0;
         foreach ($data as $preference) {
-            $added += $this->run(
+            $added += $this->db->run(
                 "UPDATE `customers_preferences` SET `setting_name` = ?, `setting_value` = ? WHERE `customer_id` = ?",
                 [
                     $preference["name"],
                     $preference["value"],
-                    $id
+                    $params["id"]
                 ]
             )->insert();
         }
         return $added;
     }
 
-    public function updatePreferences($id, $data)
+    public function updatePreferences($params = null)
     {
+        $data = Request::getBody();
         $added = 0;
         foreach ($data as $preference) {
-            $added += $this->run(
+            $added += $this->db->run(
                 "UPDATE `customers_preferences` SET `setting_value` = ? WHERE setting_name` = ? AND `customer_id` = ?",
                 [
                     $preference["value"],
                     $preference["name"],
-                    $id
+                    $params["id"]
                 ]
             )->insert();
         }

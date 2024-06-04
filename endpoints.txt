@@ -1,0 +1,242 @@
+Users
+
+- POST /users/login: Retrieve a list of all users
+- POST /users/logout: Retrieve a specific vehicle by ID
+- POST /users/register: Create a new vehicle
+
+Vehicles
+
+- GET /vehicles: Retrieve a list of all vehicles
+- GET /vehicles/{id}: Retrieve a specific vehicle by ID
+- POST /vehicles: Create a new vehicle
+- PUT /vehicles/{id}: Update a vehicle's information
+- DELETE /vehicles/{id}: Delete a vehicle
+
+Branches
+
+- GET /branches: Retrieve a list of all branches
+- GET /branches/{id}: Retrieve a specific branch by ID
+- POST /branches: Create a new branch
+- PUT /branches/{id}: Update a branch's information
+- DELETE /branches/{id}: Delete a branch
+
+Managers
+
+- GET /managers: Retrieve a list of all managers
+- GET /managers/{id}: Retrieve a specific manager by ID
+- POST /managers: Create a new manager
+- PUT /managers/{id}: Update a manager's information
+- DELETE /managers/{id}: Delete a manager
+
+Drivers
+
+- GET /drivers: Retrieve a list of all drivers
+- GET /drivers/{id}: Retrieve a specific driver by ID
+- POST /drivers: Create a new driver
+- PUT /drivers/{id}: Update a driver's information
+- DELETE /drivers/{id}: Delete a driver
+
+Customers
+
+- GET /customers: Retrieve a list of all customers
+- GET /customers/{id}: Retrieve a specific customer by ID
+- POST /customers: Create a new customer
+- PUT /customers/{id}: Update a customer's information
+- DELETE /customers/{id}: Delete a customer
+
+Manager Notification Settings
+
+- GET /manager-notification-settings: Retrieve a list of all manager notification settings
+- GET /manager-notification-settings/{id}: Retrieve a specific manager notification setting by ID
+- POST /manager-notification-settings: Create a new manager notification setting
+- PUT /manager-notification-settings/{id}: Update a manager notification setting
+- DELETE /manager-notification-settings/{id}: Delete a manager notification setting
+
+Driver Notification Settings
+
+- GET /driver-notification-settings: Retrieve a list of all driver notification settings
+- GET /driver-notification-settings/{id}: Retrieve a specific driver notification setting by ID
+- POST /driver-notification-settings: Create a new driver notification setting
+- PUT /driver-notification-settings/{id}: Update a driver notification setting
+- DELETE /driver-notification-settings/{id}: Delete a driver notification setting
+
+Customer Notification Settings
+
+- GET /customer-notification-settings: Retrieve a list of all customer notification settings
+- GET /customer-notification-settings/{id}: Retrieve a specific customer notification setting by ID
+- POST /customer-notification-settings: Create a new customer notification setting
+- PUT /customer-notification-settings/{id}: Update a customer notification setting
+- DELETE /customer-notification-settings/{id}: Delete a customer notification setting
+
+Customer Preferences
+
+- GET /customer-preferences: Retrieve a list of all customer preferences
+- GET /customer-preferences/{id}: Retrieve a specific customer preference by ID
+- POST /customer-preferences: Create a new customer preference
+- PUT /customer-preferences/{id}: Update a customer preference
+- DELETE /customer-preferences/{id}: Delete a customer preference
+
+Promotional Codes
+
+- GET /promotional-codes: Retrieve a list of all promotional codes
+- GET /promotional-codes/{id}: Retrieve a specific promotional code by ID
+- POST /promotional-codes: Create a new promotional code
+- PUT /promotional-codes/{id}: Update a promotional code
+- DELETE /promotional-codes/{id}: Delete a promotional code
+
+Customer Promotional Codes
+
+- GET /customer-promotional-codes: Retrieve a list of all customer-promotional codes
+- GET /customer-promotional-codes/{id}: Retrieve a specific customer-promotional code by ID
+- POST /customer-promotional-codes: Create a new customer-promotional code
+- PUT /customer-promotional-codes/{id}: Update a customer-promotional code
+- DELETE /customer-promotional-codes/{id}: Delete a customer-promotional code
+
+Pickup Requests
+
+- GET /pickup-requests: Retrieve a list of all pickup requests
+- GET /pickup-requests/{id}: Retrieve a specific pickup request by ID
+- POST /pickup-requests: Create a new pickup request
+- PUT /pickup-requests/{id}: Update a pickup request
+- DELETE /pickup-requests/{id}: Delete a pickup request
+
+Pickup Request Details
+
+- GET /pickup-requests/{id}/details: Retrieve the details of a specific pickup request
+- POST /pickup-requests/{id}/details: Create new details for a pickup request
+- PUT /pickup-requests/{id}/details: Update the details of a pickup request
+- DELETE /pickup-requests/{id}/details: Delete the details of a pickup request
+
+Pickup Request Payments
+
+- GET /pickup-requests/{id}/payments: Retrieve the payment information for a specific pickup request
+- POST /pickup-requests/{id}/payments: Process a payment for a pickup request
+- PUT /pickup-requests/{id}/payments: Update the payment status of a pickup request
+- DELETE /pickup-requests/{id}/payments: Delete the payment information for a pickup request
+
+Pickup Requests Assignments
+
+- GET /pickup-requests/{id}/assignments: Retrieve the assignment information for a specific pickup request
+- POST /pickup-requests/{id}/assignments: Assign a driver to a pickup request
+- PUT /pickup-requests/{id}/assignments: Update the assignment status of a pickup request
+- DELETE /pickup-requests/{id}/assignments: Delete the assignment information for a pickup request
+
+Pickup Requests Driver Routes
+
+- GET /pickup-requests/{id}/driver-routes: Retrieve the driver route information for a specific pickup request
+- POST /pickup-requests/{id}/driver-routes: Create a new driver route for a pickup request
+- PUT /pickup-requests/{id}/driver-routes: Update the driver route information for a pickup request
+- DELETE /pickup-requests/{id}/driver-routes: Delete the driver route information for a pickup request
+
+Orders
+
+- GET /orders: Retrieve a list of all orders
+- GET /orders/{id}: Retrieve a specific order by ID
+- POST /orders: Create a new order
+- PUT /orders/{id}: Update an order
+- DELETE /orders/{id}: Delete an order
+
+Order Items
+
+- GET /orders/{id}/items: Retrieve the items associated with a specific order
+- POST /orders/{id}/items: Add a new item to an order
+- PUT /orders/{id}/items/{item_id}: Update the quantity or amount of an item in an order
+- DELETE /orders/{id}/items/{item_id}: Remove an item from an order
+
+Invoices
+
+- GET /orders/{id}/invoice: Retrieve the invoice for a specific order
+- POST /orders/{id}/invoice: Generate a new invoice for an order
+- PUT /orders/{id}/invoice: Update the invoice for an order
+- DELETE /orders/{id}/invoice: Delete the invoice for an order
+
+Invoice Payments
+
+- GET /invoices/{id}/payments: Retrieve the payment history for a specific invoice
+- POST /invoices/{id}/payments: Process a payment for an invoice
+- PUT /invoices/{id}/payments/{payment_id}: Update the status of a payment
+- DELETE /invoices/{id}/payments/{payment_id}: Delete a payment record
+
+Delivery Requests
+
+- GET /delivery-requests: Retrieve a list of all delivery requests
+- GET /delivery-requests/{id}: Retrieve a specific delivery request by ID
+- POST /delivery-requests: Create a new delivery request
+- PUT /delivery-requests/{id}: Update a delivery request
+- DELETE /delivery-requests/{id}: Delete a delivery request
+
+Delivery Request Details
+
+- GET /delivery-requests/{id}/details: Retrieve the details of a specific delivery request
+- POST /delivery-requests/{id}/details: Create new details for a delivery request
+- PUT /delivery-requests/{id}/details: Update the details of a delivery request
+- DELETE /delivery-requests/{id}/details: Delete the details of a delivery request
+
+Delivery Request Payments
+
+- GET /delivery-requests/{id}/payments: Retrieve the payment information for a specific delivery request
+- POST /delivery-requests/{id}/payments: Process a payment for a delivery request
+- PUT /delivery-requests/{id}/payments: Update the payment status of a delivery request
+- DELETE /delivery-requests/{id}/payments: Delete the payment information for a delivery request
+
+Delivery Requests Assignments
+
+- GET /delivery-requests/{id}/assignments: Retrieve the assignment information for a specific delivery request
+- POST /delivery-requests/{id}/assignments: Assign a driver to a delivery request
+- PUT /delivery-requests/{id}/assignments: Update the assignment status of a delivery request
+- DELETE /delivery-requests/{id}/assignments: Delete the assignment information for a delivery request
+
+Delivery Requests Driver Routes
+
+- GET /delivery-requests/{id}/driver-routes: Retrieve the driver route information for a specific delivery request
+- POST /delivery-requests/{id}/driver-routes: Create a new driver route for a delivery request
+- PUT /delivery-requests/{id}/driver-routes: Update the driver route information for a delivery request
+- DELETE /delivery-requests/{id}/driver-routes: Delete the driver route information for a delivery request
+
+Pickup Requests Conversations
+
+- GET /pickup-requests/{id}/conversations: Retrieve a list of conversations for a specific pickup request
+- POST /pickup-requests/{id}/conversations: Create a new conversation for a pickup request
+- GET /pickup-requests/conversations/{id}: Retrieve a specific conversation by ID
+- DELETE /pickup-requests/conversations/{id}: Delete a conversation
+
+Pickup Requests Messages
+
+- GET /pickup-requests/conversations/{id}/messages: Retrieve a list of messages for a specific conversation
+- POST /pickup-requests/conversations/{id}/messages: Send a new message in a conversation
+- GET /pickup-requests/messages/{id}: Retrieve a specific message by ID
+- DELETE /pickup-requests/messages/{id}: Delete a message
+
+Delivery Requests Conversations
+
+- GET /delivery-requests/{id}/conversations: Retrieve a list of conversations for a specific delivery request
+- POST /delivery-requests/{id}/conversations: Create a new conversation for a delivery request
+- GET /delivery-requests/conversations/{id}: Retrieve a specific conversation by ID
+- DELETE /delivery-requests/conversations/{id}: Delete a conversation
+
+Delivery Requests Messages
+
+- GET /delivery-requests/conversations/{id}/messages: Retrieve a list of messages for a specific conversation
+- POST /delivery-requests/conversations/{id}/messages: Send a new message in a conversation
+- GET /delivery-requests/messages/{id}: Retrieve a specific message by ID
+- DELETE /delivery-requests/messages/{id}: Delete a message
+
+Driver Ratings
+
+- GET /pickup-requests/{id}/driver-ratings: Retrieve a list of driver ratings for a specific pickup request
+- POST /pickup-requests/{id}/driver-ratings: Create a new driver rating for a pickup request
+- GET /delivery-requests/{id}/driver-ratings: Retrieve a list of driver ratings for a specific delivery request
+- POST /delivery-requests/{id}/driver-ratings: Create a new driver rating for a delivery request
+
+Service Ratings
+
+- GET /orders/{id}/service-ratings: Retrieve a list of service ratings for a specific order
+- POST /orders/{id}/service-ratings: Create a new service rating for an order
+
+Notifications
+
+- GET /users/{id}/notifications: Retrieve a list of notifications for a specific user
+- POST /users/{id}/notifications: Create a new notification for a user
+- GET /notifications/{id}: Retrieve a specific notification by ID
+- PATCH /notifications/{id}: Update the read status of a notification
+- DELETE /notifications/{id}: Delete a notification

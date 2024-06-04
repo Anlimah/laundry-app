@@ -1,34 +1,57 @@
 <?php
 require 'bootstrap.php';
 
-use Core\Base;
-use Core\Router;
+use Controller\User;
+use Controller\Branch;
+use Controller\Customer;
+use Controller\Driver;
+use Controller\Item;
+use Controller\DeliveryRequest;
+use Controller\Invoice;
+use Controller\LaundryItem;
+use Controller\Notification;
+use Controller\Payment;
+use Controller\PickupRequest;
+use Controller\Manager;
+use Controller\Status;
+use Controller\Tracking;
+use Controller\Vehicle;
 
-// Set the content type to application/json
+use Core\Container;
+use Core\App;
+use Core\Database;
+
 header('Content-Type: application/json');
-
-$uri = parse_url($_SERVER['REQUEST_URI'])["path"];
-$method = $_SERVER['REQUEST_METHOD'];
-$router = new Router();
-$routes = require Base::base_path("/routes.php");
-$router->route($uri, $method);
-die($uri);
-
 $router = new AltoRouter();
 
-$router->map("GET", "/branch", "Branch::getAll");
-$router->map("GET", "/branch/{id}", "Branch::getById");
-$router->map("POST", "/branch/", "Branch::getAll");
-$router->map("PUT", "/branch/{id}", "Branch::getAll");
-$router->map("DELETE", "/branch/{id}", "Branch::getAll");
+$router->map('POST', '/laundry-app/user/register', 'Controller\User', 'register');
+$router->map('POST', '/laundry-app/user/login', 'Controller\User', 'login');
+
+// Only authenticated users of the system can access endpoints below
+
+$router->map('GET', '/laundry-app/users/logout', 'Controller\User', 'logout');
+
+$router->map('GET', '/laundry-app/branch', 'Controller\Branch', 'getAll');
+$router->map('GET', '/laundry-app/branch/[i:id]', 'Controller\Branch', 'getById');
+$router->map('POST', '/laundry-app/branch', 'Controller\Branch', 'createBranch');
+$router->map('PUT', '/laundry-app/branch/[i:id]', 'Controller\Branch', 'updateBranch');
 
 $match = $router->match();
 
 if ($match) {
     $controller = $match['target'];
+    $function = $match['name'];
     $params = $match['params'];
-    $controller = new $controller();
-    $controller->{$match['name']}($params['id']);
+
+    $cContainer = Container::bind($controller, function ($controller, $function, $params) {
+        $instance = new $controller(DB);
+        return $instance->$function($params);
+    });
+
+    App::setContainer($cContainer);
+    $response = App::getContainer()->resolve($controller, [$controller, $function, $params]);
+
+    die($response);
 } else {
-    // ... handle route not found ...
+    http_response_code(404);
 }

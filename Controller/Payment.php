@@ -1,4 +1,7 @@
 <?php
+
+namespace Controller;
+
 class Payment
 {
     private $db;
