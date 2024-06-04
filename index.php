@@ -18,8 +18,8 @@ $router = new AltoRouter();
 
 $router->map('GET', '/branch', 'Branch::getAll');
 $router->map('GET', '/branch/{id}', 'Branch::getById');
-$router->map('GET', '/branch/', 'Branch::getAll');
-$router->map('GET', '/branches', 'Branch::getAll');
+$router->map('POST', '/branch/', 'Branch::getAll');
+$router->map('PUT', '/branch/{id}', 'Branch::getAll');
 
 $match = $router->match();
 
