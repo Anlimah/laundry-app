@@ -1,3 +1,11 @@
+CREATE TABLE users (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `type` ENUM('customer', 'driver', 'manager') NOT NULL,
+    `username` VARCHAR(255) UNIQUE NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE branches (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(255) NOT NULL,
@@ -13,6 +21,7 @@ CREATE INDEX branches_created_at_idx1 ON `branches` (`created_at`);
 
 CREATE TABLE managers (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
     `branch_id` INT NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
@@ -22,7 +31,8 @@ CREATE TABLE managers (
     `email_address` VARCHAR(255) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE INDEX managers_first_name_idx1 ON `managers` (`first_name`);
 CREATE INDEX managers_last_name_idx1 ON `managers` (`last_name`);
@@ -48,6 +58,7 @@ CREATE INDEX vehicles_created_at_idx1 ON `vehicles` (`created_at`);
 
 CREATE TABLE drivers (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
     `branch_id` INT,
     `vehicle_id` INT,
     `first_name` VARCHAR(255) NOT NULL,
@@ -59,7 +70,8 @@ CREATE TABLE drivers (
     `password` VARCHAR(255) NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE INDEX drivers_first_name_idx1 ON `drivers` (`first_name`);
@@ -72,6 +84,7 @@ CREATE INDEX drivers_created_at_idx1 ON `drivers` (`created_at`);
 
 CREATE TABLE customers (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
     `full_name` VARCHAR(255) GENERATED ALWAYS AS (CONCAT(`first_name`,' ',`last_name`)) STORED,
@@ -79,7 +92,8 @@ CREATE TABLE customers (
     `address` VARCHAR(255),
     `email_address` VARCHAR(255) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE INDEX customers_first_name_idx1 ON `customers` (`first_name`);
 CREATE INDEX customers_last_name_idx1 ON `customers` (`last_name`);
