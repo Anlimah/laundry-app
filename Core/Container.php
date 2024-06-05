@@ -6,19 +6,19 @@ use Exception;
 
 class Container
 {
-    protected static $bindings = [];
+    protected $bindings = [];
 
-    public static function bind($key, $resolver)
+    public function bind($key, $resolver)
     {
-        static::$bindings[$key] = $resolver;
+        $this->bindings[$key] = $resolver;
     }
 
-    public static function resolve($key, $args = [])
+    public function resolve($key, $args = [])
     {
-        if (!array_key_exists($key, static::$bindings)) {
+        if (!array_key_exists($key, $this->bindings)) {
             throw new Exception("No matching binding found for {$key}");
         }
-        $resolver = static::$bindings[$key];
+        $resolver = $this->bindings[$key];
         return call_user_func_array($resolver, $args);
     }
 }

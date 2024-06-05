@@ -13,10 +13,8 @@ $dotenv->load();
 define("ROOT_DIR", dirname(__FILE__, 1));
 
 $container = new Container();
-App::setContainer($container);
 
-$container = Container::bind(Database::class, function () {
+$dbContainer = $container->bind(Database::class, function () {
     return new Database("root", "");
 });
-
-define('DB', App::getContainer()->resolve(Database::class));
+App::setContainer($container);

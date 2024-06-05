@@ -21,6 +21,8 @@ use Core\Container;
 use Core\App;
 use Core\Database;
 
+$db = App::getContainer()->resolve(Database::class);
+
 header('Content-Type: application/json');
 $router = new AltoRouter();
 
@@ -43,13 +45,13 @@ if ($match) {
     $function = $match['name'];
     $params = $match['params'];
 
-    $cContainer = Container::bind($controller, function ($controller, $function, $params) {
-        $instance = new $controller(DB);
+    $cContainer = (new Container())->bind($controller, function ($controller, $db, $function, $params) {
+        $instance = new $controller($db);
         return $instance->$function($params);
     });
 
     App::setContainer($cContainer);
-    $response = App::getContainer()->resolve($controller, [$controller, $function, $params]);
+    $response = App::getContainer()->resolve($controller, [$controller, $db, $function, $params]);
 
     die($response);
 } else {
