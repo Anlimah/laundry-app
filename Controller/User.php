@@ -14,42 +14,47 @@ use Controller\Customer;
 class User
 {
     private $db;
-    private $username;
-    private $password;
+    private $db_config;
 
-    public function __construct($username, $password)
+    public function __construct($db_config)
     {
-        $this->username = $username;
-        $this->password = $password;
-        $this->db = new Database($this->username, $this->password);
+        $this->db = new Database($db_config);
+        $this->db_config = $db_config;
     }
 
-    public function register($params = null): mixed
+    public function getUserRole($category): mixed
     {
-        $data = Request::getBody();
-        $account =  $this->db->run(
-            "INSERT INTO `users` (`category`, `username`, `password`) VALUES(?, ?)",
+        return $this->db->run("SELECT `id` FROM `roles` WHERE `name` = ?", [$category])->fetchOne();
+    }
+
+    public function register($data): mixed
+    {
+        $role["id"] = $this->getUserRole($data["category"]);
+        if (empty($role)) return Response::json(Status::$HTTP_400_BAD_REQUEST, "Couldn't find a role for specified the user category");
+        $user_id =  $this->db->run(
+            "INSERT INTO `users` (`role_id`, `email`, `password`) VALUES(?, ?, ?)",
             [
-                $data["category"],
+                $role["id"],
+                $data["email"],
                 $data["username"],
                 password_hash($data["password"], PASSWORD_BCRYPT)
             ]
         )->insert(true, null);
 
-        if (!$account) return Response::json(Status::$HTTP_400_BAD_REQUEST, "");
+        if (!$user_id) return Response::json(Status::$HTTP_400_BAD_REQUEST, "");
 
         switch ($data["category"]) {
             case 'customer':
-                $customerObj = new Customer($this->username, $this->password);
-                $user = $customerObj->createCustomer($data);
+                $customerObj = new Customer($this->db_config);
+                $user = $customerObj->createAccount($user_id, $data);
                 break;
             case 'driver':
-                $customerObj = new Driver($this->username, $this->password);
-                $user = $customerObj->createAccount($data);
+                $customerObj = new Driver($this->db_config);
+                $user = $customerObj->createAccount($user_id, $data);
                 break;
             case 'manager':
-                $customerObj = new Manager($this->username, $this->password);
-                $user = $customerObj->createAccount($data);
+                $customerObj = new Manager($this->db_config);
+                $user = $customerObj->createAccount($user_id, $data);
                 break;
 
             default:
@@ -63,35 +68,33 @@ class User
             return Response::json(Status::$HTTP_201_CREATED, $message, $data = null);
         }
 
-        $data["id"] = $account;
+        $data["id"] = $user_id;
         $message = "Account successfully created!";
         return Response::json(Status::$HTTP_201_CREATED, $message, $data);
     }
 
-    public function login($params = null): mixed
+    public function login($data): mixed
     {
     }
 
-    public function updateUsername($params = null)
+    public function updateUsername($data)
     {
-        $data = Request::getBody();
         return $this->db->run(
             "UPDATE `users` SET `username` = ? WHERE id = ?",
             [
                 $data["username"],
-                $params["id"]
+                $data["id"]
             ]
         )->update();
     }
 
-    public function updatePassword($params = null)
+    public function updatePassword($data)
     {
-        $data = Request::getBody();
         return $this->db->run(
             "UPDATE `users` SET `password` = ? WHERE id = ?",
             [
                 password_hash($data["password"], PASSWORD_BCRYPT),
-                $params["id"]
+                $data["id"]
             ]
         )->update();
     }

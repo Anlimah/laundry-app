@@ -2,13 +2,15 @@
 
 namespace Controller;
 
+use Core\Database;
+
 class Notification
 {
     private $db;
 
-    public function __construct($db)
+    public function __construct($db_config)
     {
-        $this->db = $db;
+        $this->db = new Database($db_config);
     }
 
     public function getNotifications()

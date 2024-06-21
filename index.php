@@ -42,15 +42,11 @@ if ($match) {
     $controller = $match['target'];
     $function = $match['name'];
     $params = $match['params'];
-
-    $cContainer = Container::bind($controller, function ($controller, $function, $params) {
-        $instance = new $controller(DB);
-        return $instance->$function($params);
-    });
-
-    App::setContainer($cContainer);
-    $response = App::getContainer()->resolve($controller, [$controller, $function, $params]);
-
+    $request_data = json_decode(file_get_contents('php://input'), true);
+    $db_config = require("config/database.php");
+    //die(json_encode($request_data));
+    $instance = new $controller($db_config["database"]["mysql"]);
+    $response = $instance->$function($request_data);
     die($response);
 } else {
     http_response_code(404);

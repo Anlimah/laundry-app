@@ -9,9 +9,9 @@ class Manager
 {
     private $db;
 
-    public function __construct($username, $password)
+    public function __construct($db_config)
     {
-        $this->db = new Database($username, $password);
+        $this->db = new Database($db_config);
     }
 
     public function getAll($params = null)

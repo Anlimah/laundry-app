@@ -13,21 +13,23 @@ class Database
     private $params;
     private $stmt;
 
-    public function __construct($user, $pass, $dbServer = "mysql")
+
+    public function __construct($config)
     {
-        $config = array(
-            "host" => "127.0.0.1",
-            "port" => "3306",
-            "charset" => "utf8mb4",
-            "dbname" => "laundry_app"
-        );
-        $dsn = "{$dbServer}:" . http_build_query($config, "", ";");
-        $options = array(
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        );
+        $user = getenv("DB_USERNAME");
+        $pass = getenv("DB_PASSWORD");
+
+        $dsn = "mysql:" . http_build_query($config, "", ";");
         try {
-            $this->conn = new PDO($dsn, $user, $pass, $options);
+            $this->conn = new PDO(
+                $dsn,
+                $user,
+                $pass,
+                [
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+                ]
+            );
         } catch (PDOException $e) {
             throw $e;
         }

@@ -2,13 +2,15 @@
 
 namespace Controller;
 
+use Core\Database;
+
 class DeliveryRequest
 {
     private $db;
 
-    public function __construct($db)
+    public function __construct($config)
     {
-        $this->db = $db;
+        $this->db = new Database($config);
     }
 
     public function getAll()

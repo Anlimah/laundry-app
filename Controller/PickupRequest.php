@@ -2,13 +2,15 @@
 
 namespace Controller;
 
+use Core\Database;
+
 class PickupRequest
 {
     private $db;
 
-    public function __construct($db)
+    public function __construct($db_config)
     {
-        $this->db = $db;
+        $this->db = new Database($db_config);
     }
 
     public function getPickupRequests()
@@ -69,6 +71,6 @@ class PickupRequest
 
     public function deletePickupRequest($id)
     {
-        return $this->db->prepare("DELETE FROM PickupRequests WHERE id = ?", [$id])->delete();
+        return $this->db->run("DELETE FROM PickupRequests WHERE id = ?", [$id])->delete();
     }
 }

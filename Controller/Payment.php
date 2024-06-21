@@ -2,18 +2,20 @@
 
 namespace Controller;
 
+use Core\Database;
+
 class Payment
 {
     private $db;
 
-    public function __construct($db)
+    public function __construct($db_config)
     {
-        $this->db = $db;
+        $this->db = new Database($db_config);
     }
 
     public function getInvoices($laundryId)
     {
-        return $this->db->query("SELECT * FROM Invoices WHERE laundry_id = ?", [$laundryId])->fetchAll();
+        return $this->db->run("SELECT * FROM Invoices WHERE laundry_id = ?", [$laundryId])->fetchAll();
     }
 
     public function getInvoice($id)
@@ -44,7 +46,7 @@ class Payment
 
     public function getRequestPayments($requestId)
     {
-        return $this->db->query("SELECT * FROM RequestPayments WHERE request_id = ?", [$requestId])->fetchAll();
+        return $this->db->run("SELECT * FROM RequestPayments WHERE request_id = ?", [$requestId])->fetchAll();
     }
 
     public function getRequestPayment($id)

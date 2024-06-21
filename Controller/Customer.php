@@ -9,39 +9,36 @@ class Customer
 {
     private $db;
 
-    public function __construct($username, $password)
+    public function __construct($config)
     {
-        $this->db = new Database($username, $password);
+        $this->db = new Database($config);
     }
 
-    public function getAll($params = null)
+    public function getAll($data = [])
     {
         return $this->db->run("SELECT * FROM `customers`")->fetchAll();
     }
 
-    public function getById($params = null)
+    public function getById($data = [])
     {
-        return $this->db->run("SELECT * FROM `customers` WHERE `id` = ?", [$params["id"]])->fetchOne();
+        return $this->db->run("SELECT * FROM `customers` WHERE `id` = ?", [$data["id"]])->fetchOne();
     }
 
-    public function createCustomer($data = [])
+    public function createAccount($user_id, $data = [])
     {
         return $this->db->run(
-            "INSERT INTO `customers` 
-            (`first_name`, `last_name`, `phone_number`, `address`) 
-            VALUES (?, ?, ?, ?)",
+            "INSERT INTO `customers` (`user_id`, `first_name`, `last_name`, `phone_number`) VALUES (?, ?, ?, ?, ?)",
             [
+                $user_id,
                 $data["first_name"],
                 $data["last_name"],
-                $data["phone_number"],
-                $data["address"]
+                $data["phone_number"]
             ]
         )->insert();
     }
 
-    public function updateCustomer($params = null)
+    public function updateAccount($data = [])
     {
-        $data = Request::getBody();
         return $this->db->run(
             "UPDATE `customers` SET 
             `first_name` = ?, `last_name` = ?, `phone_number` = ?, `address` = ?
@@ -51,25 +48,24 @@ class Customer
                 $data["last_name"],
                 $data["phone_number"],
                 $data["address"],
-                $params["id"]
+                $data["id"]
             ]
         )->update();
     }
 
-    public function deleteCustomer($params = null)
+    public function deleteAccount($data = [])
     {
-        return $this->db->run("DELETE FROM `customers` WHERE id = ?", [$params["id"]])->delete();
+        return $this->db->run("DELETE FROM `customers` WHERE id = ?", [$data["id"]])->delete();
     }
 
-    public function createNotification($params = null)
+    public function createNotification($data = [])
     {
-        $data = Request::getBody();
         $added = 0;
         foreach ($data as $notification) {
             $added += $this->db->run(
                 "INSERT INTO `customers_notification_settings` (`customer_id`, `type`, `enabled`) VALUES (?, ?, ?)",
                 [
-                    $params["id"],
+                    $data["id"],
                     $notification["type"],
                     $notification["enabled"]
                 ]
@@ -78,9 +74,8 @@ class Customer
         return $added;
     }
 
-    public function updateNotification($params = null)
+    public function updateNotification($data = [])
     {
-        $data = Request::getBody();
         $added = 0;
         foreach ($data as $notification) {
             $added += $this->db->run(
@@ -88,16 +83,15 @@ class Customer
                 [
                     $notification["type"],
                     $notification["enabled"],
-                    $params["id"]
+                    $data["id"]
                 ]
             )->insert();
         }
         return $added;
     }
 
-    public function addPreferences($params = null)
+    public function addPreferences($data = [])
     {
-        $data = Request::getBody();
         $added = 0;
         foreach ($data as $preference) {
             $added += $this->db->run(
@@ -105,16 +99,15 @@ class Customer
                 [
                     $preference["name"],
                     $preference["value"],
-                    $params["id"]
+                    $data["id"]
                 ]
             )->insert();
         }
         return $added;
     }
 
-    public function updatePreferences($params = null)
+    public function updatePreferences($data = [])
     {
-        $data = Request::getBody();
         $added = 0;
         foreach ($data as $preference) {
             $added += $this->db->run(
@@ -122,7 +115,7 @@ class Customer
                 [
                     $preference["value"],
                     $preference["name"],
-                    $params["id"]
+                    $data["id"]
                 ]
             )->insert();
         }

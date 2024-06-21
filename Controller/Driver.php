@@ -9,9 +9,9 @@ class Driver
 {
     private $db;
 
-    public function __construct($username, $password)
+    public function __construct($config)
     {
-        $this->db = new Database($username, $password);
+        $this->db = new Database($config);
     }
 
     public function getAll($params = null)

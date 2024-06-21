@@ -2,18 +2,20 @@
 
 namespace Controller;
 
+use Core\Database;
+
 class Status
 {
     private $db;
 
-    public function __construct($db)
+    public function __construct($db_config)
     {
-        $this->db = $db;
+        $this->db = new Database($db_config);
     }
 
     public function getStatuses()
     {
-        return $this->db->query("SELECT * FROM Statuses")->fetchAll();
+        return $this->db->run("SELECT * FROM Statuses")->fetchAll();
     }
 
     public function getStatus($id)
