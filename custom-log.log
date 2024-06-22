@@ -1,0 +1,20 @@
+Secret Key: 8TPNQwykWWXnV535Q0Ht1Dac9oqydW/Bk9AePcHV7aY=
+Token: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MjEsImVtYWlsIjoia29iaW5hLmJlbnRlbmVAZ21haWwuY29tIiwicm9sZSI6MX0.iiyiS5PVdKKAXIYU9fARtu0uU6MAjRIl4eToeOHru4YToken 
+Authentication Failed: Unexpected control character found
+Secret Key: 8TPNQwykWWXnV535Q0Ht1Dac9oqydW/Bk9AePcHV7aY=
+Token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MjEsImVtYWlsIjoia29iaW5hLmJlbnRlbmVAZ21haWwuY29tIiwicm9sZSI6MX0.iiyiS5PVdKKAXIYU9fARtu0uU6MAjRIl4eToeOHru4Y
+Decoded Token: stdClass Object
+(
+    [id] => 21
+    [email] => kobina.bentene@gmail.com
+    [role] => 1
+)
+
+Secret Key: 8TPNQwykWWXnV535Q0Ht1Dac9oqydW/Bk9AePcHV7aY=
+Token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MjEsImVtYWlsIjoia29iaW5hLmJlbnRlbmVAZ21haWwuY29tIiwicm9sZSI6MX0.iiyiS5PVdKKAXIYU9fARtu0uU6MAjRIl4eToeOHru4Y
+Decoded Token: stdClass Object
+(
+    [id] => 21
+    [email] => kobina.bentene@gmail.com
+    [role] => 1
+)

@@ -27,14 +27,14 @@ class Customer
     public function createAccount($user_id, $data = [])
     {
         return $this->db->run(
-            "INSERT INTO `customers` (`user_id`, `first_name`, `last_name`, `phone_number`) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO `customers` (`user_id`, `first_name`, `last_name`, `phone_number`) VALUES (?, ?, ?, ?)",
             [
                 $user_id,
                 $data["first_name"],
                 $data["last_name"],
                 $data["phone_number"]
             ]
-        )->insert();
+        )->insert(true, null);
     }
 
     public function updateAccount($data = [])

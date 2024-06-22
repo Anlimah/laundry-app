@@ -29,23 +29,18 @@ class Manager
         return $this->db->run("SELECT * FROM `managers` WHERE `branch_id` = ?", [$params["id"]])->fetchOne();
     }
 
-    public function createAccount($params = null)
+    public function createAccount($user_id, $data = [])
     {
-        $data = Request::getBody();
         return $this->db->run(
-            "INSERT INTO `managers` 
-            (`branch_id`, `first_name`, `last_name`, `phone_number`, `address`, `email_address`, `password`) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO `managers` (`user_id`, `branch_id`, `first_name`, `last_name`, `phone_number`) VALUES (?, ?, ?, ?, ?)",
             [
+                $user_id,
                 $data["branch_id"],
                 $data["first_name"],
                 $data["last_name"],
-                $data["phone_number"],
-                $data["address"],
-                $data["email_address"],
-                password_hash($data["password"], PASSWORD_BCRYPT)
+                $data["phone_number"]
             ]
-        )->insert();
+        )->insert(true, null);
     }
 
     public function updateAccount($params = null)

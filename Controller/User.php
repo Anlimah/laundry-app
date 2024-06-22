@@ -10,6 +10,8 @@ use Core\Status;
 use Controller\Manager;
 use Controller\Driver;
 use Controller\Customer;
+use Firebase\JWT\JWT;
+use Auth\Auth;
 
 class User
 {
@@ -27,55 +29,131 @@ class User
         return $this->db->run("SELECT `id` FROM `roles` WHERE `name` = ?", [$category])->fetchOne();
     }
 
-    public function register($data): mixed
+    public function userExists($data = []): mixed
     {
-        $role["id"] = $this->getUserRole($data["category"]);
-        if (empty($role)) return Response::json(Status::$HTTP_400_BAD_REQUEST, "Couldn't find a role for specified the user category");
+        return $this->db->run("SELECT * FROM `users` WHERE `email` = ?", [$data["email"]])->fetchOne();
+    }
+
+    private function createAccountBasedOnCategory($user_id, $data): mixed
+    {
+        switch ($data["category"]) {
+            case "customer":
+                $customerObj = new Customer($this->db_config);
+                return array("success" => true, "account_id" => $customerObj->createAccount($user_id, $data));
+            case "driver":
+                $driverObj = new Driver($this->db_config);
+                return array("success" => true, "account_id" => $driverObj->createAccount($user_id, $data));
+            case "manager":
+                $managerObj = new Manager($this->db_config);
+                return array("success" => true, "account_id" => $managerObj->createAccount($user_id, $data));
+            default:
+                return array(
+                    "success" => false,
+                    "status_code" => Status::$HTTP_400_BAD_REQUEST,
+                    "message" => "Couldn't find a role for specified the user category",
+                    "data" => null
+                );
+        }
+    }
+
+    public function createUserAccount($data = []): mixed
+    {
+        $role = $this->getUserRole($data["category"]);
+        if (empty($role)) return array("success" => false, 'message' => "Couldn't find a role for specified the user category");
+        $hashed_password = password_hash($data["password"], PASSWORD_BCRYPT);
         $user_id =  $this->db->run(
-            "INSERT INTO `users` (`role_id`, `email`, `password`) VALUES(?, ?, ?)",
+            "INSERT INTO `users` (`role_id`, `email`, `password`) VALUES(:r, :e, :p)",
             [
-                $role["id"],
-                $data["email"],
-                $data["username"],
-                password_hash($data["password"], PASSWORD_BCRYPT)
+                ":r" => $role["id"],
+                ":e" => $data["email"],
+                ":p" => $hashed_password
             ]
         )->insert(true, null);
 
-        if (!$user_id) return Response::json(Status::$HTTP_400_BAD_REQUEST, "");
+        if (!$user_id) return array("success" => false, 'message' => "Couldn't find a role for specified the user category");
 
-        switch ($data["category"]) {
-            case 'customer':
-                $customerObj = new Customer($this->db_config);
-                $user = $customerObj->createAccount($user_id, $data);
-                break;
-            case 'driver':
-                $customerObj = new Driver($this->db_config);
-                $user = $customerObj->createAccount($user_id, $data);
-                break;
-            case 'manager':
-                $customerObj = new Manager($this->db_config);
-                $user = $customerObj->createAccount($user_id, $data);
-                break;
+        $secret_key = (new Auth($this->db_config))->generateSecretKey();
+        $this->db->run(
+            "INSERT INTO `user_secret_keys`(`user_id`, `secret_key`) VALUES(?,?)",
+            [$user_id, $secret_key]
+        )->insert(true, null);
 
-            default:
-                $message = "No match found for specified user category!";
-                return Response::json(Status::$HTTP_201_CREATED, $message, $data = null);
-                break;
+        return array("success" => true, "data" => $user_id);
+    }
+
+    public function register($data): mixed
+    {
+        $user_exists = $this->userExists($data);
+        if ($user_exists) {
+            return array(
+                "status_code" => Status::$HTTP_200_OK,
+                "message" => "User with this email already exists! Please try logging in to continue.",
+                "data" => null
+            );
         }
 
-        if (!$user) {
-            $message = "Failed to create user account!";
-            return Response::json(Status::$HTTP_201_CREATED, $message, $data = null);
+        $user = $this->createUserAccount($data);
+        if (!$user["success"]) {
+            $user["status_code"] = Status::$HTTP_400_BAD_REQUEST;
+            $user["data"] = null;
+            return $user;
         }
 
-        $data["id"] = $user_id;
-        $message = "Account successfully created!";
-        return Response::json(Status::$HTTP_201_CREATED, $message, $data);
+        $account = $this->createAccountBasedOnCategory($user["data"], $data);
+        if (!$account["success"]) return $account;
+
+        $data["id"] = $user["data"];
+        if (isset($data["password"])) unset($data["password"]);
+
+        return array(
+            "success" => true,
+            "status_code" => Status::$HTTP_201_CREATED,
+            "message" => "Account successfully created!",
+            "data" => $data
+        );
     }
 
     public function login($data): mixed
     {
+        $user_exists = $this->userExists($data);
+        if (!$user_exists) return array(
+            "status_code" => Status::$HTTP_404_NOT_FOUND,
+            "message" => "No account found with this email! Please register to continue.",
+            "data" => null
+        );
+
+        $verified = password_verify($data["password"], $user_exists["password"]);
+        if (!$verified) return array(
+            "status_code" => Status::$HTTP_400_BAD_REQUEST,
+            "message" => "Incorrect email or password!",
+            "data" => null
+        );
+
+        $auth = new Auth($this->db_config);
+        $secret_key = $auth->getSecretKey($user_exists["id"]);
+
+        $user_data = array(
+            "id" => $user_exists["id"],
+            "email" => $user_exists["email"],
+            "role" => $user_exists["role_id"]
+        );
+
+        if (!isset($_SESSION['token'])) {
+            $token = $auth->generateAPIToken($user_data, $secret_key);
+            $_SESSION["user"]['token'] = $token;
+        }
+        $_SESSION["user"]["id"] = $user_exists["id"];
+        $_SESSION["user"]["email"] = $user_exists["email"];
+        $_SESSION["user"]["role"] = $user_exists["role_id"];
+
+        if (isset($data["password"])) unset($data["password"]);
+        return array(
+            "status_code" => Status::$HTTP_200_OK,
+            "message" => "Login successful!",
+            "data" => array("token" => $_SESSION["user"]['token'])
+        );
     }
+
 
     public function updateUsername($data)
     {

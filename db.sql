@@ -60,6 +60,32 @@ CREATE INDEX users_password_idx1 ON `users` (`password`);
 CREATE INDEX users_created_at_idx1 ON `users` (`created_at`);
 CREATE INDEX users_updated_at_idx1 ON `users` (`updated_at`);
 
+CREATE TABLE login_tokens (
+    `id` INT PRIMARY KEY,
+    `user_id` INT,
+    `token` VARCHAR(255) NOT NULL,
+    `expires_at` TIMESTAMP NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX login_tokens_token_idx1 ON `login_tokens` (`token`);
+CREATE INDEX login_tokens_expires_at_idx1 ON `login_tokens` (`expires_at`);
+CREATE INDEX login_tokens_created_at_idx1 ON `login_tokens` (`created_at`);
+CREATE INDEX login_tokens_updated_at_idx1 ON `login_tokens` (`updated_at`);
+
+CREATE TABLE user_secret_keys (
+    `id` INT PRIMARY KEY,
+    `user_id` INT,
+    `secret_key` VARCHAR(255),
+    `created_at` TIMESTAMP DEFAULT  CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX user_secret_keys_secret_key_idx1 ON `user_secret_keys` (`secret_key`);
+CREATE INDEX user_secret_keys_created_at_idx1 ON `user_secret_keys` (`created_at`);
+CREATE INDEX user_secret_keys_updated_at_idx1 ON `user_secret_keys` (`updated_at`);
+
 CREATE TABLE managers (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `user_id` INT,
