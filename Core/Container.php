@@ -6,7 +6,7 @@ use Exception;
 
 class Container
 {
-    protected $bindings = [];
+    protected static $bindings = [];
 
     public function bind($key, $resolver)
     {
@@ -16,7 +16,7 @@ class Container
 
     public static function resolve($key, $function, $params)
     {
-        if (!array_key_exists($key, $this->bindings)) {
+        if (!array_key_exists($key, static::$bindings)) {
             throw new Exception("No matching binding found for {$key}");
         }
         $resolver = static::$bindings[$key];
