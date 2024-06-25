@@ -29,7 +29,6 @@ class Branch
 
     public function create($data)
     {
-        $data = Request::getBody();
         $query = "INSERT INTO `branches`
         (`name`, `address`, `latitude`, `longitude`, `phone_number`, `email_address`) 
         VALUES (:name, :address, :latitude, :longitude, :phone_number, :email_address)";
@@ -46,7 +45,6 @@ class Branch
 
     public function edit($id, $data)
     {
-        $data = Request::getBody();
         $query = "UPDATE `branches` SET 
         `name` = :name, `address` = :address, `latitude` = :latitude, `longitude` = :longitude, 
         `phone_number` = :phone_number, `email_address` = :email_address WHERE `id` = :id";

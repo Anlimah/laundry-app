@@ -34,7 +34,7 @@ class User
         return $this->db->run("SELECT * FROM `users` WHERE `email` = ?", [$data["email"]])->fetchOne();
     }
 
-    private function createAccountBasedOnCategory($user_id, $data): mixed
+    public function createAccountBasedOnCategory($user_id, $data): mixed
     {
         switch ($data["category"]) {
             case "customer":
@@ -80,80 +80,6 @@ class User
 
         return array("success" => true, "data" => $user_id);
     }
-
-    public function register($data): mixed
-    {
-        $user_exists = $this->userExists($data);
-        if ($user_exists) {
-            return array(
-                "status_code" => Status::$HTTP_200_OK,
-                "message" => "User with this email already exists! Please try logging in to continue.",
-                "data" => null
-            );
-        }
-
-        $user = $this->createUserAccount($data);
-        if (!$user["success"]) {
-            $user["status_code"] = Status::$HTTP_400_BAD_REQUEST;
-            $user["data"] = null;
-            return $user;
-        }
-
-        $account = $this->createAccountBasedOnCategory($user["data"], $data);
-        if (!$account["success"]) return $account;
-
-        $data["id"] = $user["data"];
-        if (isset($data["password"])) unset($data["password"]);
-
-        return array(
-            "success" => true,
-            "status_code" => Status::$HTTP_201_CREATED,
-            "message" => "Account successfully created!",
-            "data" => $data
-        );
-    }
-
-    public function login($data): mixed
-    {
-        $user_exists = $this->userExists($data);
-        if (!$user_exists) return array(
-            "status_code" => Status::$HTTP_404_NOT_FOUND,
-            "message" => "No account found with this email! Please register to continue.",
-            "data" => null
-        );
-
-        $verified = password_verify($data["password"], $user_exists["password"]);
-        if (!$verified) return array(
-            "status_code" => Status::$HTTP_400_BAD_REQUEST,
-            "message" => "Incorrect email or password!",
-            "data" => null
-        );
-
-        $auth = new Auth($this->db_config);
-        $secret_key = $auth->getSecretKey($user_exists["id"]);
-
-        $user_data = array(
-            "id" => $user_exists["id"],
-            "email" => $user_exists["email"],
-            "role" => $user_exists["role_id"]
-        );
-
-        if (!isset($_SESSION['token'])) {
-            $token = $auth->generateAPIToken($user_data, $secret_key);
-            $_SESSION["user"]['token'] = $token;
-        }
-        $_SESSION["user"]["id"] = $user_exists["id"];
-        $_SESSION["user"]["email"] = $user_exists["email"];
-        $_SESSION["user"]["role"] = $user_exists["role_id"];
-
-        if (isset($data["password"])) unset($data["password"]);
-        return array(
-            "status_code" => Status::$HTTP_200_OK,
-            "message" => "Login successful!",
-            "data" => array("token" => $_SESSION["user"]['token'])
-        );
-    }
-
 
     public function updateUsername($data)
     {

@@ -32,7 +32,6 @@ class Item
 
     public function createItem($data)
     {
-        $data = Request::getBody();
         return $this->db->run(
             "INSERT INTO Items (name, unit_cost) VALUES (?, ?)",
             [$data['name'], $data['unit_cost']]
@@ -41,7 +40,6 @@ class Item
 
     public function updateItem($id, $data)
     {
-        $data = Request::getBody();
         return $this->db->run(
             "UPDATE Items SET name = ?, unit_cost = ? WHERE id = ?",
             [
@@ -54,7 +52,6 @@ class Item
 
     public function deleteItem($id)
     {
-        $data = Request::getBody();
         return $this->db->run(
             "DELETE FROM Items WHERE id = ?",
             [$id]

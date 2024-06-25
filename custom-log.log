@@ -18,3 +18,12 @@ Decoded Token: stdClass Object
     [email] => kobina.bentene@gmail.com
     [role] => 1
 )
+
+Generated Secret: /IyNqvd6guyARys8pkxjULXXx8HoyAHuRIwSgtUpuOs=
+Generated Secret: cbK7MF3MSD3n9CnPhPpSqFJZ3G0UwZNPFCBvBIKikv0=
+Generated Secret: CS2CH0MyGFQH2x5oDc6nIQ31yWOQAe0Ufq1u3rvn4As=
+Token Authentication Failed: Key material must not be empty
+Token Authentication Failed: Key material must not be empty
+Token Authentication Failed: Key material must not be empty
+Token Authentication Failed: Key material must not be empty
+Token Authentication Failed: Signature verification failed

@@ -24,14 +24,15 @@ header('Content-Type: application/json');
 
 $router = new AltoRouter();
 
-$router->map('POST', '/laundry-app/user/register', 'Controller\User', 'register');
-$router->map('POST', '/laundry-app/user/login', 'Controller\User', 'login');
+$router->map('POST', '/laundry-app/auth/register', 'Auth\Auth', 'register');
+$router->map('POST', '/laundry-app/auth/login', 'Auth\Auth', 'login');
 
 // Authenticate middleware
 $router->map('GET|POST|PUT|DELETE', '/laundry-app/.*', 'Auth\Auth', 'authenticate');
 
 // Only authenticated users of the system can access endpoints below
 $router->map('GET', '/laundry-app/users/logout', 'Controller\User', 'logout');
+
 $router->map('GET', '/laundry-app/branch', 'Controller\Branch', 'getAll');
 $router->map('GET', '/laundry-app/branch/[i:id]', 'Controller\Branch', 'getById');
 $router->map('POST', '/laundry-app/branch', 'Controller\Branch', 'createBranch');

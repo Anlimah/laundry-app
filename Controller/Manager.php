@@ -14,19 +14,19 @@ class Manager
         $this->db = new Database($db_config);
     }
 
-    public function getAll($params = null)
+    public function getAll($data = [])
     {
         return $this->db->run("SELECT * FROM `managers`")->fetchAll();
     }
 
-    public function getById($params = null)
+    public function getById($data = [])
     {
-        return $this->db->run("SELECT * FROM `managers` WHERE `id` = ?", [$params["id"]])->fetchOne();
+        return $this->db->run("SELECT * FROM `managers` WHERE `id` = ?", [$data["id"]])->fetchOne();
     }
 
-    public function getByBranchId($params = null)
+    public function getByBranchId($data = [])
     {
-        return $this->db->run("SELECT * FROM `managers` WHERE `branch_id` = ?", [$params["id"]])->fetchOne();
+        return $this->db->run("SELECT * FROM `managers` WHERE `branch_id` = ?", [$data["id"]])->fetchOne();
     }
 
     public function createAccount($user_id, $data = [])
@@ -43,9 +43,8 @@ class Manager
         )->insert(true, null);
     }
 
-    public function updateAccount($params = null)
+    public function updateAccount($data = [])
     {
-        $data = Request::getBody();
         return $this->db->run(
             "UPDATE `managers` SET 
             `first_name` = ?, `last_name` = ?, `phone_number` = ?, `address` = ?, `email_address` = ?
@@ -56,37 +55,35 @@ class Manager
                 $data["phone_number"],
                 $data["address"],
                 $data["email_address"],
-                $params["id"]
+                $data["id"]
             ]
         )->update();
     }
 
-    public function updatePassword($params = null)
+    public function updatePassword($data = [])
     {
-        $data = Request::getBody();
         return $this->db->run(
             "UPDATE `managers` SET `password` = ? WHERE id = ?",
             [
                 password_hash($data["password"], PASSWORD_BCRYPT),
-                $params["id"]
+                $data["id"]
             ]
         )->update();
     }
 
-    public function deleteAccount($params = null)
+    public function deleteAccount($data = [])
     {
-        return $this->db->run("DELETE FROM `managers` WHERE id = ?", [$params["id"]])->delete();
+        return $this->db->run("DELETE FROM `managers` WHERE id = ?", [$data["id"]])->delete();
     }
 
-    public function createNotification($params = null)
+    public function createNotification($data = [])
     {
-        $data = Request::getBody();
         $added = 0;
         foreach ($data as $notification) {
             $added += $this->db->run(
                 "INSERT INTO `managers_notification_settings` (`manager_id`, `type`, `enabled`) VALUES (?, ?, ?)",
                 [
-                    $params["id"],
+                    $data["id"],
                     $notification["type"],
                     $notification["enabled"]
                 ]
@@ -95,9 +92,8 @@ class Manager
         return $added;
     }
 
-    public function updateNotification($params = null)
+    public function updateNotification($data = [])
     {
-        $data = Request::getBody();
         $added = 0;
         foreach ($data as $notification) {
             $added += $this->db->run(
@@ -105,7 +101,7 @@ class Manager
                 [
                     $notification["type"],
                     $notification["enabled"],
-                    $params["id"]
+                    $data["id"]
                 ]
             )->insert();
         }
