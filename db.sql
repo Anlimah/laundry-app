@@ -72,6 +72,16 @@ CREATE INDEX login_tokens_token_idx1 ON `login_tokens` (`token`);
 CREATE INDEX login_tokens_type_idx1 ON `login_tokens` (`type`);
 CREATE INDEX login_tokens_created_at_idx1 ON `login_tokens` (`created_at`);
 
+CREATE TABLE expired_tokens (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `token` VARCHAR(255) NOT NULL,
+    `type` VARCHAR(50) NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX expired_tokens_token_idx1 ON `expired_tokens` (`token`);
+CREATE INDEX expired_tokens_type_idx1 ON `expired_tokens` (`type`);
+CREATE INDEX expired_tokens_created_at_idx1 ON `expired_tokens` (`created_at`);
+
 CREATE TABLE user_secret_keys (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `user_id` INT,

@@ -37,10 +37,18 @@ class Auth
         return !empty($result) ? $result["secret_key"] : null;
     }
 
-    private function storeTokenInDatabase($user_id, $token, $type)
+    public function getExpiredToken($token): mixed
+    {
+        return $this->db->run(
+            "SELECT `token` FROM `expired_tokens` WHERE `token` = ?",
+            [$token]
+        )->fetchOne();
+    }
+
+    private function storeTokenInDatabase($user_id, $token, $type, $expiry)
     {
         $this->db->run(
-            "INSERT INTO `login_tokens` (`user_id`, `token`, `type`, `created_at`) VALUES (?, ?, ?, ?)",
+            "INSERT INTO `login_tokens` (`user_id`, `token`, `type`, `created_at`, `expire_at`) VALUES (?, ?, ?, ?)",
             [
                 $user_id,
                 $token,
@@ -52,10 +60,24 @@ class Auth
 
     public function getTokensByUserId($user_id, $type = null)
     {
-        return $this->db->run(
-            "SELECT `token` FROM `login_tokens` WHERE `user_id` = ? AND `type` = ?",
-            [$user_id, $type]
+        if ($type) {
+            $query = "SELECT * FROM `login_tokens` WHERE `user_id` = ? AND `type` = ?";
+            $params = [$user_id, $type];
+            return $this->db->run($query, $params)->fetchOne();
+        } else {
+            $query = "SELECT * FROM `login_tokens` WHERE `user_id` = ?";
+            $params = [$user_id];
+            return $this->db->run($query, $params)->fetchAll();
+        }
+    }
+
+    public function getUserIDByToken($token): mixed
+    {
+        $result = $this->db->run(
+            "SELECT `user_id` FROM `login_tokens` WHERE `token` = ?",
+            [$token]
         )->fetchOne();
+        return !empty($result) ? $result["user_id"] : null;
     }
 
     public function generateAccessToken($data, $secret_key)
@@ -68,7 +90,7 @@ class Auth
             "data" => $data
         );
         $jwt = JWT::encode($payload, $secret_key, 'HS256');
-        $this->storeTokenInDatabase($data['id'], $jwt, 'access');
+        $this->storeTokenInDatabase($data['id'], $jwt, 'access', $expirationTime);
         return $jwt;
     }
 
@@ -82,31 +104,30 @@ class Auth
             "data" => $data
         );
         $jwt = JWT::encode($payload, $secret_key, 'HS256');
-        $this->storeTokenInDatabase($data['id'], $jwt, 'refresh');
+        $this->storeTokenInDatabase($data['id'], $jwt, 'refresh', $expirationTime);
         return $jwt;
     }
 
     public function validateToken($token): mixed
     {
         try {
-            $user_id = $_SESSION["user"]["id"];
-            $secret_key = $this->getSecretKey($user_id);
-            $decoded_token = JWT::decode($token, new Key($secret_key, 'HS256'));
-            return $decoded_token->data;
-        } catch (Exception $e) {
-            return null;
-        }
-    }
+            if (strpos($token, 'Bearer ') === 0) $token = substr($token, 7);
+            $cleaned_token = trim($token);
 
-    public function verifyToken($token): bool
-    {
-        try {
-            $user_id = $_SESSION["user"]["id"];
+            $expired = $this->getExpiredToken($cleaned_token);
+            // return array("success" => false, "message" => "Token has expired! -> $expired");
+            if ($expired) return array("success" => false, "message" => "Token has expired!");
+
+            $user_id = $this->getUserIDByToken($cleaned_token);
+            if (!$user_id) return array("success" => false, "message" => "Invalid token!");
+
             $secret_key = $this->getSecretKey($user_id);
-            $decoded_token = JWT::decode($token, new Key($secret_key, 'HS256'));
-            return $decoded_token->data;
+            if (!$secret_key) return array("success" => false, "message" => "Invalid token!");
+
+            $decoded_token = JWT::decode($cleaned_token, new Key($secret_key, 'HS256'));
+            return array("success" => true, "message" => "access granted!", "data" => $decoded_token->data);
         } catch (Exception $e) {
-            return false;
+            return array("success" => false, "message" => $e->getMessage());
         }
     }
 
@@ -122,19 +143,19 @@ class Auth
             );
         }
 
-        $user = $this->validateToken($token);
-        if (!$user) {
+        $validated_token = $this->validateToken($token);
+        if (!$validated_token["success"]) {
             return array(
                 "status_code" => Status::$HTTP_401_UNAUTHORIZED,
-                "message" => 'Invalid token!',
-                "data" => $user
+                "message" => $validated_token["message"],
+                "data" => null
             );
         }
 
         return array(
             "status_code" => Status::$HTTP_200_OK,
-            "message" => 'accessed!',
-            "data" => $user
+            "message" => $validated_token["message"],
+            "data" => $validated_token["data"]
         );
     }
 
@@ -218,16 +239,17 @@ class Auth
             "data" => null
         );
 
-        $tokens = $this->getTokensByUserId($user_exists["id"]);
+        $accessTokenData = $this->getTokensByUserId($user_exists["id"], 'access');
+        $refreshTokenData = $this->getTokensByUserId($user_exists["id"], 'refresh');
 
         $current_time = time();
         $generate_new_tokens = true;
 
-        if ($tokens) {
-            $accessToken = $tokens['access'];
-            $refreshToken = $tokens['refresh'];
-            $accessTokenExpiry = $tokens['type'] === "access" ? $tokens['expiry'] : null;
-            $refreshTokenExpiry = $tokens['type'] === "refresh" ? $tokens['expiry'] : null;
+        if (!empty($accessTokenData) && !empty($refreshTokenData)) {
+            $accessToken = $accessTokenData['token'];
+            $refreshToken = $refreshTokenData['token'];
+            $accessTokenExpiry = $accessTokenData['type'] === "access" ? $accessTokenData['expiry'] : null;
+            $refreshTokenExpiry = $refreshTokenData['type'] === "refresh" ? $refreshTokenData['expiry'] : null;
             if ($accessTokenExpiry > $current_time && $refreshTokenExpiry > $current_time) $generate_new_tokens = false;
         }
 
