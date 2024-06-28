@@ -14,8 +14,6 @@ class Auth
 {
     private $db;
     private $db_config;
-    private $accessTokenExpiry = 3600; // 1 hour
-    private $refreshTokenExpiry = 1209600; // 2 weeks
 
     public function __construct($db_config)
     {
@@ -48,12 +46,13 @@ class Auth
     private function storeTokenInDatabase($user_id, $token, $type, $expiry)
     {
         $this->db->run(
-            "INSERT INTO `login_tokens` (`user_id`, `token`, `type`, `created_at`, `expire_at`) VALUES (?, ?, ?, ?)",
+            "INSERT INTO `login_tokens` (`user_id`, `token`, `type`, `created_at`, `expire_at`) VALUES (?, ?, ?, ?, ?)",
             [
                 $user_id,
                 $token,
                 $type,
-                date('Y-m-d H:i:s')
+                date('Y-m-d H:i:s'),
+                $expiry
             ]
         )->insert(true, null);
     }
@@ -80,31 +79,29 @@ class Auth
         return !empty($result) ? $result["user_id"] : null;
     }
 
-    public function generateAccessToken($data, $secret_key)
+    public function generateToken($data, $secret_key, $type)
     {
-        $issuedAt = time();
-        $expirationTime = $issuedAt + 3600; // Token valid for 1 hour
-        $payload = array(
-            "iat" => $issuedAt,
-            "exp" => $expirationTime,
-            "data" => $data
-        );
-        $jwt = JWT::encode($payload, $secret_key, 'HS256');
-        $this->storeTokenInDatabase($data['id'], $jwt, 'access', $expirationTime);
-        return $jwt;
-    }
+        $issuedAt = new \DateTime();
 
-    public function generateRefreshToken($data, $secret_key)
-    {
-        $issuedAt = time();
-        $expirationTime = $issuedAt + (30 * 24 * 60 * 60);
+        if ($type === 'access') {
+            $expirationTime = new \DateTime();
+            $expirationTime->add(new \DateInterval('PT1H')); // Token valid for 1 hour
+        } elseif ($type === 'refresh') {
+            $expirationTime = new \DateTime();
+            $expirationTime->add(new \DateInterval('P14D')); // Token valid for 2 weeks
+        } else {
+            throw new Exception('Invalid token type specified');
+        }
+
         $payload = array(
-            "iat" => $issuedAt,
-            "exp" => $expirationTime,
+            "iat" => $issuedAt->getTimestamp(),
+            "exp" => $expirationTime->getTimestamp(),
             "data" => $data
         );
+
         $jwt = JWT::encode($payload, $secret_key, 'HS256');
-        $this->storeTokenInDatabase($data['id'], $jwt, 'refresh', $expirationTime);
+        $this->storeTokenInDatabase($data['id'], $jwt, $type, $expirationTime->format('Y-m-d H:i:s'));
+
         return $jwt;
     }
 
@@ -115,7 +112,6 @@ class Auth
             $cleaned_token = trim($token);
 
             $expired = $this->getExpiredToken($cleaned_token);
-            // return array("success" => false, "message" => "Token has expired! -> $expired");
             if ($expired) return array("success" => false, "message" => "Token has expired!");
 
             $user_id = $this->getUserIDByToken($cleaned_token);
@@ -168,8 +164,8 @@ class Auth
 
             $userData = $decoded_token->data;
 
-            $newAccessToken = $this->generateAccessToken($userData, $secret_key);
-            $newRefreshToken = $this->generateRefreshToken($userData, $secret_key);
+            $newAccessToken = $this->generateToken($userData, $secret_key, "access");
+            $newRefreshToken = $this->generateToken($userData, $secret_key, "refresh");
 
             return array(
                 "status_code" => Status::$HTTP_200_OK,
@@ -243,25 +239,37 @@ class Auth
         $refreshTokenData = $this->getTokensByUserId($user_exists["id"], 'refresh');
 
         $current_time = time();
-        $generate_new_tokens = true;
+        $generate_new_access_tokens = true;
+        $generate_new_refresh_tokens = true;
 
         if (!empty($accessTokenData) && !empty($refreshTokenData)) {
             $accessToken = $accessTokenData['token'];
             $refreshToken = $refreshTokenData['token'];
-            $accessTokenExpiry = $accessTokenData['type'] === "access" ? $accessTokenData['expiry'] : null;
-            $refreshTokenExpiry = $refreshTokenData['type'] === "refresh" ? $refreshTokenData['expiry'] : null;
-            if ($accessTokenExpiry > $current_time && $refreshTokenExpiry > $current_time) $generate_new_tokens = false;
+            $accessTokenExpiry = $accessTokenData['expire_at'];
+            $refreshTokenExpiry = $refreshTokenData['expire_at'];
+            if ($accessTokenExpiry > $current_time) $generate_new_access_tokens = false;
+            if ($refreshTokenExpiry > $current_time) $generate_new_refresh_tokens = false;
         }
 
-        if ($generate_new_tokens) {
+        if ($generate_new_refresh_tokens) {
             $secret_key = $this->getSecretKey($user_exists["id"]);
             $user_data = array(
                 "id" => $user_exists["id"],
                 "email" => $user_exists["email"],
                 "role" => $user_exists["role_id"]
             );
-            $accessToken = $this->generateAccessToken($user_data, $secret_key);
-            $refreshToken = $this->generateRefreshToken($user_data, $secret_key);
+            $accessToken = $this->generateToken($user_data, $secret_key, "access");
+            $refreshToken = $this->generateToken($user_data, $secret_key, "refresh");
+        }
+
+        if ($generate_new_access_tokens && !$generate_new_refresh_tokens) {
+            $secret_key = $this->getSecretKey($user_exists["id"]);
+            $user_data = array(
+                "id" => $user_exists["id"],
+                "email" => $user_exists["email"],
+                "role" => $user_exists["role_id"]
+            );
+            $accessToken = $this->generateToken($user_data, $secret_key, "refresh");
         }
 
         if (isset($data["password"])) unset($data["password"]);

@@ -66,21 +66,27 @@ CREATE TABLE login_tokens (
     `token` VARCHAR(255) NOT NULL,
     `type` VARCHAR(50) NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `expire_at` DATETIME NOT NULL,
     FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE INDEX login_tokens_token_idx1 ON `login_tokens` (`token`);
 CREATE INDEX login_tokens_type_idx1 ON `login_tokens` (`type`);
 CREATE INDEX login_tokens_created_at_idx1 ON `login_tokens` (`created_at`);
+CREATE INDEX login_tokens_expire_at_idx1 ON `login_tokens` (`expire_at`);
 
 CREATE TABLE expired_tokens (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT,
     `token` VARCHAR(255) NOT NULL,
     `type` VARCHAR(50) NOT NULL,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `expire_at` DATETIME NOT NULL,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE NO ACTION ON UPDATE CASCADE
 );
 CREATE INDEX expired_tokens_token_idx1 ON `expired_tokens` (`token`);
 CREATE INDEX expired_tokens_type_idx1 ON `expired_tokens` (`type`);
 CREATE INDEX expired_tokens_created_at_idx1 ON `expired_tokens` (`created_at`);
+CREATE INDEX expired_tokens_expire_at_idx1 ON `expired_tokens` (`expire_at`);
 
 CREATE TABLE user_secret_keys (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
