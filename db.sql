@@ -475,7 +475,7 @@ CREATE INDEX driver_ratings_rating_idx1 ON `driver_ratings` (`rating`);
 CREATE INDEX driver_ratings_created_at_idx1 ON `driver_ratings` (`created_at`);
 CREATE INDEX driver_ratings_updated_at_idx1 ON `driver_ratings` (`updated_at`);
 
-CREATE TABLE service_ratings (
+CREATE TABLE customer_service_ratings (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `order_id` INT,
     `customer_id` INT,
@@ -486,9 +486,9 @@ CREATE TABLE service_ratings (
     FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
     FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE NO ACTION ON UPDATE CASCADE
 );
-CREATE INDEX service_ratings_rating_idx1 ON `service_ratings` (`rating`);
-CREATE INDEX service_ratings_created_at_idx1 ON `service_ratings` (`created_at`);
-CREATE INDEX service_ratings_updated_at_idx1 ON `service_ratings` (`updated_at`);
+CREATE INDEX customer_service_ratings_rating_idx1 ON `customer_service_ratings` (`rating`);
+CREATE INDEX customer_service_ratings_created_at_idx1 ON `customer_service_ratings` (`created_at`);
+CREATE INDEX customer_service_ratings_updated_at_idx1 ON `customer_service_ratings` (`updated_at`);
 
 CREATE TABLE notifications (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
